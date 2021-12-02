@@ -5,6 +5,27 @@ using namespace std;
 int main() {
 	system(" mode  con lines=30   cols=60 ");
 
+	ifstream readFile;
+	readFile.open("test.txt"); 
+	if (readFile.is_open()) {
+		while (!readFile.eof()) {
+			//1. istream의 getline.
+			/*
+			char tmp[256];
+			readFile.getline(tmp, 256);
+			cout << tmp << endl;    //지금은 읽은 문자열 바로 출력.
+			*/
+
+			//2. std::getline.
+			string str;
+			getline(readFile, str);
+			cout << str << endl;    //지금은 읽은 문자열 바로 출력.
+		}
+		readFile.close();    //파일 닫아줍니다.
+	}
+	return 0;
+}
+
 	int num = 0;
 	string data;
 	string data_name, data_num;
@@ -45,7 +66,7 @@ int main() {
 			cout << "잘못입력하셨습니다.\n";
 			break;
 		}
-		
+
 	}
 	return 0;
 }
