@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 
 struct Phone_data {
 	std::string name;
@@ -56,18 +55,22 @@ struct DLL {
 		int cnt = 0;
 		bool io = false;
 		Node* ptr = head;
+		Node* temp = ptr;
 		std::cout << "_________________________________________________________\n";
 		std::cout << "<<                         목록                        >>\n";
 		std::cout << "\n";
 		while (1) {
-			if (ptr == NULL) {
+			if (temp == NULL) {
 				io = true;
 				break;
 			}
 
-			std::cout << "[" << cnt << "] " << ptr->data.name << "     " << ptr->data.num << "\n";
-			if (ptr->next == NULL) { break; }
-			ptr = ptr->next;
+			std::cout << "[" << cnt << "] " << temp->data.name;
+			std::cout.width(15); 
+			std::cout << temp->data.num << "\n";
+			
+			if (temp->next == NULL) { break; }
+			temp = temp->next;
 			cnt++;
 		}
 		std::cout << "_________________________________________________________\n";
@@ -85,9 +88,9 @@ struct DLL {
 		std::cout << "---------------------------------------------------------\n\n";
 		std::cout << "추가할 정보 (이름 and 번호) : ";
 		std::cin >> data_name >> data_num;
-		
+
 		Node* New_Node = new Node(data_name, data_num, NULL, NULL);
-		
+
 		while (1) {
 			if (head == NULL) { //전화번호부가 비어있을때
 				head = New_Node;
@@ -119,27 +122,52 @@ struct DLL {
 				}
 				ptr = ptr->next;
 			}
-		}	
+		}
 		system("cls");
 	}
 
 	void Delete_Node() {
+		int cnt = 0;
 		bool io = false;
 		std::string data = "";
 		Node* ptr = head;
 		Node* temp = ptr;
 
-		if (Print_data()) { 
+		if (Print_data()) {
 			std::cout << "삭제할 정보가 존재하지 않습니다.\n";
-			return; 
+			return;
 		}
 
 		else {
 			std::cout << "---------------------------------------------------------\n\n";
 			std::cout << "삭제할 정보(이름 or 번호) : ";
 			std::cin >> data;
-			
 
+			while (temp != NULL) {
+				if (temp->data.name == data) { cnt++; }
+				temp = temp->next;
+			}
+
+			if (cnt > 1) {
+				temp = ptr;
+				cnt = 0;
+				system("cls");
+				std::cout << "_________________________________________________________\n";
+				std::cout << "<<                     중복된 정보                     >>\n";
+				while (temp != NULL) {
+					if (temp->data.name == data) {
+						std::cout << "[" << cnt << "] " << temp->data.name << "     " << temp->data.num << "\n";
+						cnt++;
+					}
+					temp = temp->next;
+				}
+
+				std::cout << "---------------------------------------------------------\n\n";
+				std::cout << "삭제할 정보(전화번호) : ";
+				std::cin >> data;
+			
+			}
+			temp = ptr;
 			while (ptr != NULL) {
 				if (ptr->data.name == data || ptr->data.num == data) { io = true; break; }
 				else {
@@ -147,6 +175,7 @@ struct DLL {
 					ptr = ptr->next;
 				}
 			}
+			
 			if (io == false) { std::cout << "입력하신 정보는 존재하지 않습니다.\n"; return; }
 
 			else if (temp == ptr) {
@@ -168,112 +197,157 @@ struct DLL {
 		}
 	}
 
-	void Next_Node_Check(Node* next_Node, Node* ptr) { //수정되기 전 노드의 next와 수정된 노드의 비교함수
-		next_Node->next->prev = ptr;
-		ptr->next = next_Node->next;
-		next_Node->prev = ptr->prev;
-		ptr->prev->next = next_Node;
-		ptr->prev = next_Node;
-		next_Node->next = ptr;
+	
+	//수정된 연락처 정렬
+	void Modify_sort(Node* target) {
+		Node* Cur_Node = target;
+		bool off = false;
+		
+		while (1) {
+			if (Cur_Node->next != NULL && target->data.name > Cur_Node->next->data.name) {
+				off = true;
+				Cur_Node = Cur_Node->next;
+				if (Cur_Node->next == NULL) { break; }
+			}
+			else if (Cur_Node->prev != NULL && target->data.name < Cur_Node->prev->data.name) {
+				off = true;
+				Cur_Node = Cur_Node->prev;
+				if (Cur_Node->prev == NULL) { break; }
+			}
+			else { break; }
+		}
+		if (target == head) {
+			if (Cur_Node->data.name < target->data.name && Cur_Node->next != NULL) {
+				head = target->next;
+				target->next = Cur_Node->next;
+				Cur_Node->next->prev = target;
+				target->prev = Cur_Node;
+				Cur_Node->next = target;
+				
+			}
+			else if (Cur_Node->data.name < target->data.name && Cur_Node->next == NULL) {
+				head = target->next;
+				target->next = NULL;
+				target->prev = Cur_Node;
+				Cur_Node->next = target;
+			}
+		}
+		else if (target->next == NULL) {
+			if (Cur_Node->data.name > target->data.name && Cur_Node->prev != NULL) {
+				target->prev->next = NULL;
+				Cur_Node->prev->next = target;
+				target->prev = Cur_Node->prev;
+				target->next = Cur_Node;
+				Cur_Node->prev = target;
+			}
 
-		ptr = ptr->next;
+			else if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
+				head = target;
+				target->prev->next = NULL;
+				head->next = Cur_Node;
+				head->next->prev = target;
+			}
+			
+		}
+		else if(target->prev != NULL && target->next != NULL){
+			if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
+				target->prev->next = target->next;
+				target->next->prev = target->prev;
+				head = target;
+				head->next = Cur_Node;
+				Cur_Node->prev = head;
+			}
+			else if (Cur_Node->data.name > target->data.name && Cur_Node->prev != NULL) {
+				target->prev->next = target->next;
+				target->next->prev = target->prev;
+				Cur_Node->prev->next = target;
+				target->prev = Cur_Node->prev;
+				target->next = Cur_Node;
+				Cur_Node->prev = target;
+			}
+
+			else if(Cur_Node->data.name < target->data.name) {
+				if (Cur_Node->next != NULL) {
+					target->next->prev = target->prev;
+					target->prev->next = target->next;
+					target->next = Cur_Node->next;
+					target->prev = Cur_Node;
+					Cur_Node->next->prev = target;
+					Cur_Node->next = target;
+				}
+				else {
+					target->next->prev = target->prev;
+					target->prev->next = target->next;
+					target->next = NULL;
+					target->prev = Cur_Node;
+					Cur_Node->next = target;
+				}
+			}
+		}
+		else { return; }
 	}
 
-	void Prev_Node_Check(Node* prev_Node, Node* ptr) {//수정되기 전 노드의 prev와 수정된 노드의 비교함수
-		ptr->next->prev = prev_Node;
-		prev_Node->next = ptr->next;
-		prev_Node->prev->next = ptr;
-		ptr->prev = prev_Node->prev;
-		ptr->next = prev_Node;
-
-		ptr = ptr->prev;
-
-	}
 	//수정 함수
 	void Modify_Node() {
-		int s_data = 0;
-		std::string data_name = "", data_num = "";
+		int data_idx = 0;
+		std::string data_name, data_num;
 		Node* ptr = head;
 		Node* temp = ptr;
-		Node* next_Node = NULL;
-		Node* prev_Node = NULL;
 
-		if (Print_data()) { 
+		if (Print_data()) {
 			std::cout << "수정할 정보가 존재하지 않습니다.\n";
-			return; 
+			return;
 		}
 
 		else {
 			std::cout << "---------------------------------------------------------\n\n";
 			std::cout << "수정할 정보(index num) : ";
-			std::cin >> s_data;
+			std::cin >> data_idx;
 
-			
+
 			std::cout << "변경을 원하지 않으시는 정보는 no를 입력해주세요\n";
 			std::cout << "수정할 정보(이름) : ";
 			std::cin >> data_name;
 
 			std::cout << "수정할 정보(번호) : ";
 			std::cin >> data_num;
-			
+		
 			while (1) {
-				if (s_data == 0) {
-					next_Node = temp->next;
-					prev_Node = temp->prev;
-				}
+				if (data_idx == 0) { break; }
 				temp = temp->next;
-				next_Node = temp->next;
-				prev_Node = temp->prev;
-				s_data--;
-			}
-
-			if (data_name == "no" && data_num != "no") {
-				temp->data.num = data_num;
-			}
-
-			else if (data_num == "no" && data_name != "no") {
-				temp->data.name = data_name;
-				while (1) {
-					if (prev_Node == NULL) {
-						if (next_Node->data.name < temp->data.name) { Next_Node_Check(next_Node, temp); }
-						else { break; }
-					}
-
-					else if (next_Node == NULL) {
-						if (prev_Node->data.name > temp->data.name) { Prev_Node_Check(prev_Node, temp); }
-						else { break; }
-					}
-
-					else {
-						if (prev_Node->data.name > temp->data.name) { Prev_Node_Check(prev_Node, temp); }
-						else if (next_Node->data.name < temp->data.name) { Next_Node_Check(next_Node, temp); }
-						else { break; }
-					}
+				if (data_idx != 0 && temp == NULL) { 
+					std::cout << "존재하지 않는 idx 번호입니다.";
+					return;
 				}
+				data_idx--;
 			}
-			
-			else if (data_num != "no" && data_name != "no") {
-				temp->data.name = data_name;
-				temp->data.num = data_num;
-				while (1) {
-					if (prev_Node == NULL) {
-						if (next_Node->data.name < temp->data.name) { Next_Node_Check(next_Node, temp); }
-						else { break; }
-					}
+			if (data_name == "no" && data_num != "no") { temp->data.num = data_num; }
 
-					else if (next_Node == NULL) {
-						if (prev_Node->data.name > temp->data.name) { Prev_Node_Check(prev_Node, temp); }
-						else { break; }
-					}
+			if (temp->next == NULL && temp->prev == NULL) {
+				if (data_num == "no" && data_name != "no") { temp->data.name = data_name; }
 
-					else {
-						if (prev_Node->data.name > temp->data.name) { Prev_Node_Check(prev_Node, temp); }
-						else if (next_Node->data.name < temp->data.name) { Next_Node_Check(next_Node, temp); }
-						else { break; }
-					}
+				else if (data_num != "no" && data_name != "no") {
+					temp->data.name = data_name;
+					temp->data.num = data_num;
 				}
+
+				else { return; }
 			}
-			else { return; }
+
+			else {
+				if (data_num == "no" && data_name != "no") {
+					temp->data.name = data_name;
+					Modify_sort(temp);
+				}
+
+				else if (data_num != "no" && data_name != "no") {
+					temp->data.name = data_name;
+					temp->data.num = data_num;
+					Modify_sort(temp);
+				}
+
+				else { return; }
+			}
 		}
 	}
 
@@ -293,7 +367,7 @@ struct DLL {
 			std::cout << "<<                     검색된 정보                     >>\n";
 			while (temp != NULL) {
 				if (temp->data.name == data || temp->data.num == data) {
-					
+
 					std::cout << "[" << cnt << "] " << temp->data.name << "     " << temp->data.num << "\n";
 					cnt++;
 				}
@@ -303,5 +377,5 @@ struct DLL {
 			std::cout << "\n";
 		}
 	}
-	
+
 };
