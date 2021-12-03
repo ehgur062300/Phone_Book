@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 
-
 struct Phone_data {
 	std::string name;
 	std::string num;
@@ -38,32 +37,37 @@ struct DLL {
 			head = h;
 		}
 	}
-	void ReadFile(Node* temp) { //파일 읽어오기
+	
+	void ReadFile() { //파일 읽어오기
+		std::string name, num;
 		std::ifstream readFile;
 		readFile.open("Phone_Data_List.txt");
 		if (readFile.fail()) {
 			std::cerr << "<< error : 파일을 찾을수 없습니다. >>\n";
-			exit(100);
+			return;
 		}
-		char info[10000];
-		while (readFile.getline(info, sizeof(info))) {
-			std::cout << temp->data.name;
-			std::cout.width(15);
-			std::cout << temp->data.num << "\n";
+		while (!readFile.eof()){ 
+			if (readFile >> name >> num) { Insert_Node(name, num); }
+			else { break; }
 		}
 		readFile.close();
 	}
 
-	void WriteFile(Node* temp) { //파일에 쓰기
+	void WriteFile() { //파일에 쓰기
+		Node* ptr = head;
 		std::ofstream writeFile;
-		writeFile.open("Phone_data_list.txt");
-		if (writeFile.fail()){
-			std::cerr << "<< error : 잘못 입력하셨습니다. >>" << std::endl;
+		writeFile.open("Phone_Data_List.txt");
+		if (writeFile.fail()) {
+			std::cerr << "<< error >>" << std::endl;
+			return;
 		}
-		writeFile << temp->data.name;
-		writeFile.width(15);
-		writeFile << temp->data.num << "\n";
-
+		while (1) {
+			if (ptr == NULL) { break; }
+			writeFile << ptr->data.name;
+			writeFile.width(15);
+			writeFile << ptr->data.num << "\n";
+			ptr = ptr->next;
+		}
 		writeFile.close();
 	}
 
@@ -98,7 +102,7 @@ struct DLL {
 			std::cout << "[" << cnt << "] " << temp->data.name;
 			std::cout.width(15);
 			std::cout << temp->data.num << "\n";
-			ReadFile(temp);
+			
 			if (temp->next == NULL) { break; }
 			temp = temp->next;
 			cnt++;
@@ -108,16 +112,18 @@ struct DLL {
 	}
 
 	//추가 함수
-	void Insert_Node() {
-		system("cls");
-		std::string data_name = "", data_num = "";
+	void Insert_Node(std::string name = "", std::string num = "") {
+		std::string data_name = name , data_num = num;
 		Node* ptr = head;
 		Node* next_Node = ptr;
 
 		Print_data();
-		std::cout << "---------------------------------------------------------\n\n";
-		std::cout << "추가할 정보 (이름 and 번호) : ";
-		std::cin >> data_name >> data_num;
+		system("cls");
+		if (name == "") { 
+			std::cout << "---------------------------------------------------------\n\n";
+			std::cout << "추가할 정보 (이름 and 번호) : ";
+			std::cin >> data_name >> data_num;
+		}
 
 		Node* New_Node = new Node(data_name, data_num, NULL, NULL);
 
@@ -154,6 +160,7 @@ struct DLL {
 			}
 		}
 		system("cls");
+		WriteFile();
 	}
 
 	void Delete_Node() {
@@ -225,6 +232,7 @@ struct DLL {
 				std::cout << "정보가 삭제되었습니다. \n";
 			}
 		}
+		WriteFile();
 	}
 
 
@@ -272,9 +280,8 @@ struct DLL {
 
 			else if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
 				head = target;
-				target->prev->next = NULL;
 				head->next = Cur_Node;
-				head->next->prev = target;
+				Cur_Node->prev = target;
 			}
 
 		}
@@ -350,14 +357,21 @@ struct DLL {
 				}
 				data_idx--;
 			}
-			if (data_name == "no" && data_num != "no") { temp->data.num = data_num; }
+			if (data_name == "no" && data_num != "no") { 
+				temp->data.num = data_num;
+				WriteFile();
+			}
 
 			if (temp->next == NULL && temp->prev == NULL) {
-				if (data_num == "no" && data_name != "no") { temp->data.name = data_name; }
+				if (data_num == "no" && data_name != "no") { 
+					temp->data.name = data_name; 
+					WriteFile();
+				}
 
 				else if (data_num != "no" && data_name != "no") {
 					temp->data.name = data_name;
 					temp->data.num = data_num;
+					WriteFile();
 				}
 
 				else { return; }
@@ -367,12 +381,14 @@ struct DLL {
 				if (data_num == "no" && data_name != "no") {
 					temp->data.name = data_name;
 					Modify_sort(temp);
+					WriteFile();
 				}
 
 				else if (data_num != "no" && data_name != "no") {
 					temp->data.name = data_name;
 					temp->data.num = data_num;
 					Modify_sort(temp);
+					WriteFile();
 				}
 
 				else { return; }
@@ -388,7 +404,7 @@ struct DLL {
 		Node* temp = ptr;
 		if (Print_data()) { std::cout << "연락처에 정보가 없습니다.\n"; return; }
 		else {
-			std::cout << "검색할 정보(이름 or 번호 or 한 단어) : ";
+			std::cout << "검색할 정보(이름 or 번호) : ";
 			std::cin >> data;
 
 			system("cls");
