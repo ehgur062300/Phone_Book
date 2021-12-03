@@ -1,5 +1,7 @@
 #include <iostream>
-#inclued <fstream>
+#include <fstream>
+
+
 struct Phone_data {
 	std::string name;
 	std::string num;
@@ -36,6 +38,34 @@ struct DLL {
 			head = h;
 		}
 	}
+	void ReadFile(Node* temp) { //파일 읽어오기
+		std::ifstream readFile;
+		readFile.open("Phone_Data_List.txt");
+		if (readFile.fail()) {
+			std::cerr << "<< error : 파일을 찾을수 없습니다. >>\n";
+			exit(100);
+		}
+		char info[10000];
+		while (readFile.getline(info, sizeof(info))) {
+			std::cout << temp->data.name;
+			std::cout.width(15);
+			std::cout << temp->data.num << "\n";
+		}
+		readFile.close();
+	}
+
+	void WriteFile(Node* temp) { //파일에 쓰기
+		std::ofstream writeFile;
+		writeFile.open("Phone_data_list.txt");
+		if (writeFile.fail()){
+			std::cerr << "<< error : 잘못 입력하셨습니다. >>" << std::endl;
+		}
+		writeFile << temp->data.name;
+		writeFile.width(15);
+		writeFile << temp->data.num << "\n";
+
+		writeFile.close();
+	}
 
 	//문자 입력 예외처리 함수
 	int get_int() {
@@ -66,9 +96,9 @@ struct DLL {
 			}
 
 			std::cout << "[" << cnt << "] " << temp->data.name;
-			std::cout.width(15); 
+			std::cout.width(15);
 			std::cout << temp->data.num << "\n";
-			
+			ReadFile(temp);
 			if (temp->next == NULL) { break; }
 			temp = temp->next;
 			cnt++;
@@ -165,7 +195,7 @@ struct DLL {
 				std::cout << "---------------------------------------------------------\n\n";
 				std::cout << "삭제할 정보(전화번호) : ";
 				std::cin >> data;
-			
+
 			}
 			temp = ptr;
 			while (ptr != NULL) {
@@ -175,7 +205,7 @@ struct DLL {
 					ptr = ptr->next;
 				}
 			}
-			
+
 			if (io == false) { std::cout << "입력하신 정보는 존재하지 않습니다.\n"; return; }
 
 			else if (temp == ptr) {
@@ -197,12 +227,12 @@ struct DLL {
 		}
 	}
 
-	
+
 	//수정된 연락처 정렬
 	void Modify_sort(Node* target) {
 		Node* Cur_Node = target;
 		bool off = false;
-		
+
 		while (1) {
 			if (Cur_Node->next != NULL && target->data.name > Cur_Node->next->data.name) {
 				off = true;
@@ -223,7 +253,6 @@ struct DLL {
 				Cur_Node->next->prev = target;
 				target->prev = Cur_Node;
 				Cur_Node->next = target;
-				
 			}
 			else if (Cur_Node->data.name < target->data.name && Cur_Node->next == NULL) {
 				head = target->next;
@@ -247,9 +276,9 @@ struct DLL {
 				head->next = Cur_Node;
 				head->next->prev = target;
 			}
-			
+
 		}
-		else if(target->prev != NULL && target->next != NULL){
+		else if (target->prev != NULL && target->next != NULL) {
 			if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
 				target->prev->next = target->next;
 				target->next->prev = target->prev;
@@ -266,7 +295,7 @@ struct DLL {
 				Cur_Node->prev = target;
 			}
 
-			else if(Cur_Node->data.name < target->data.name) {
+			else if (Cur_Node->data.name < target->data.name) {
 				if (Cur_Node->next != NULL) {
 					target->next->prev = target->prev;
 					target->prev->next = target->next;
@@ -311,11 +340,11 @@ struct DLL {
 
 			std::cout << "수정할 정보(번호) : ";
 			std::cin >> data_num;
-		
+
 			while (1) {
 				if (data_idx == 0) { break; }
 				temp = temp->next;
-				if (data_idx != 0 && temp == NULL) { 
+				if (data_idx != 0 && temp == NULL) {
 					std::cout << "존재하지 않는 idx 번호입니다.";
 					return;
 				}
