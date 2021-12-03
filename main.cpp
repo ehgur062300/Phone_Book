@@ -3,15 +3,11 @@
 
 using namespace std;
 int main() {
-	int num = 0;
-	string data;
+	string data, name, num;
 	string data_name, data_num;
 	struct DLL dll;
 	system(" mode  con lines=30   cols=60 ");
-	ifstream R_File("Phone_Data_List");
-	ofstream W_File;
-
-	R_File;
+	dll.ReadFile();
 	while (1) {
 		cout << "---------------------------------------------------------\n";
 		cout << "< 1. 검색 > < 2. 수정 > < 3. 삭제 > < 4. 추가 > <5. 목록>\n";
@@ -34,7 +30,7 @@ int main() {
 			break;
 
 		case 4:
-			dll.Insert_Node();
+			dll.Insert_Node(name, num);
 			dll.Print_data();
 			break;
 
@@ -47,7 +43,6 @@ int main() {
 			cout << "잘못입력하셨습니다.\n";
 			break;
 		}
-
 	}
 	return 0;
 }
