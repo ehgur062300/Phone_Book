@@ -37,7 +37,7 @@ struct DLL {
 			head = h;
 		}
 	}
-	
+
 	void ReadFile() { //파일 읽어오기
 		std::string name, num;
 		std::ifstream readFile;
@@ -46,7 +46,7 @@ struct DLL {
 			std::cerr << "<< error : 파일을 찾을수 없습니다. >>\n";
 			return;
 		}
-		while (!readFile.eof()){ 
+		while (!readFile.eof()) {
 			if (readFile >> name >> num) { Insert_Node(name, num); }
 			else { break; }
 		}
@@ -54,7 +54,7 @@ struct DLL {
 	}
 
 	void WriteFile() { //파일에 쓰기
-		Node* ptr = head;
+		Node* node = head;
 		std::ofstream writeFile;
 		writeFile.open("Phone_Data_List.txt");
 		if (writeFile.fail()) {
@@ -62,11 +62,11 @@ struct DLL {
 			return;
 		}
 		while (1) {
-			if (ptr == NULL) { break; }
-			writeFile << ptr->data.name;
+			if (node == NULL) { break; }
+			writeFile << node->data.name;
 			writeFile.width(15);
-			writeFile << ptr->data.num << "\n";
-			ptr = ptr->next;
+			writeFile << node->data.num << "\n";
+			node = node->next;
 		}
 		writeFile.close();
 	}
@@ -93,7 +93,7 @@ struct DLL {
 		std::cout << "_________________________________________________________\n";
 		std::cout << "<<                         목록                        >>\n";
 		std::cout << "\n";
-		while (1) {
+		while (1) {//노드가 비어있으면 io = true를 반환
 			if (temp == NULL) {
 				io = true;
 				break;
@@ -102,24 +102,25 @@ struct DLL {
 			std::cout << "[" << cnt << "] " << temp->data.name;
 			std::cout.width(15);
 			std::cout << temp->data.num << "\n";
-			
+
 			if (temp->next == NULL) { break; }
 			temp = temp->next;
 			cnt++;
-		}
+		}// 노드가 비어있지 않으면 io = false를 반환
 		std::cout << "_________________________________________________________\n";
 		return io;
 	}
 
 	//추가 함수
 	void Insert_Node(std::string name = "", std::string num = "") {
-		std::string data_name = name , data_num = num;
+		std::string data_name = name, data_num = num;
 		Node* ptr = head;
-		Node* next_Node = ptr;
 
 		Print_data();
 		system("cls");
-		if (name == "") { 
+
+		// 파일에 저장된 정보를 불러오는게 아닌 메인에서 추가를 선택했을 경우
+		if (name == "") {
 			std::cout << "---------------------------------------------------------\n\n";
 			std::cout << "추가할 정보 (이름 and 번호) : ";
 			std::cin >> data_name >> data_num;
@@ -239,22 +240,20 @@ struct DLL {
 	//수정된 연락처 정렬
 	void Modify_sort(Node* target) {
 		Node* Cur_Node = target;
-		bool off = false;
 
 		while (1) {
 			if (Cur_Node->next != NULL && target->data.name > Cur_Node->next->data.name) {
-				off = true;
 				Cur_Node = Cur_Node->next;
 				if (Cur_Node->next == NULL) { break; }
 			}
 			else if (Cur_Node->prev != NULL && target->data.name < Cur_Node->prev->data.name) {
-				off = true;
 				Cur_Node = Cur_Node->prev;
 				if (Cur_Node->prev == NULL) { break; }
 			}
 			else { break; }
 		}
-		if (target == head) {
+
+		if (target == head) {//수정할 정보가 헤드일때
 			if (Cur_Node->data.name < target->data.name && Cur_Node->next != NULL) {
 				head = target->next;
 				target->next = Cur_Node->next;
@@ -269,7 +268,7 @@ struct DLL {
 				Cur_Node->next = target;
 			}
 		}
-		else if (target->next == NULL) {
+		else if (target->next == NULL) {//수정할 정보가 tail일때
 			if (Cur_Node->data.name > target->data.name && Cur_Node->prev != NULL) {
 				target->prev->next = NULL;
 				Cur_Node->prev->next = target;
@@ -279,12 +278,13 @@ struct DLL {
 			}
 
 			else if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
-				head = target;
-				head->next = Cur_Node;
+				target->prev->next = NULL;
+				target->next = Cur_Node;
 				Cur_Node->prev = target;
+				head = target;
 			}
-
 		}
+		//수정할 정보가 헤드가 아니고 tail도 아닐때
 		else if (target->prev != NULL && target->next != NULL) {
 			if (Cur_Node->data.name > target->data.name && Cur_Node->prev == NULL) {
 				target->prev->next = target->next;
@@ -301,7 +301,6 @@ struct DLL {
 				target->next = Cur_Node;
 				Cur_Node->prev = target;
 			}
-
 			else if (Cur_Node->data.name < target->data.name) {
 				if (Cur_Node->next != NULL) {
 					target->next->prev = target->prev;
@@ -357,14 +356,15 @@ struct DLL {
 				}
 				data_idx--;
 			}
-			if (data_name == "no" && data_num != "no") { 
+
+			if (data_name == "no" && data_num != "no") {
 				temp->data.num = data_num;
 				WriteFile();
 			}
 
-			if (temp->next == NULL && temp->prev == NULL) {
-				if (data_num == "no" && data_name != "no") { 
-					temp->data.name = data_name; 
+			else if (temp->next == NULL && temp->prev == NULL) {
+				if (data_num == "no" && data_name != "no") {
+					temp->data.name = data_name;
 					WriteFile();
 				}
 
@@ -390,7 +390,6 @@ struct DLL {
 					Modify_sort(temp);
 					WriteFile();
 				}
-
 				else { return; }
 			}
 		}
@@ -422,5 +421,4 @@ struct DLL {
 			std::cout << "\n";
 		}
 	}
-
 };
